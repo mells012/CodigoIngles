@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Preposition Builder — IN · ON · AT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../styles.css" />
+  </head>
+  <body>
+    <nav class="top-bar">
+      <a href="../../index.html" class="btn">🏠Home</a>
+      <a href="javascript:history.back()" class="btn">← Go Back</a>
+    </nav>
+    <div class="dot-grid" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <h1 class="site-title">
+        Preposition
+        <span class="accent-in">IN</span> · <span class="accent-on">ON</span> ·
+        <span class="accent-at">AT</span>
+      </h1>
+      <p class="site-subtitle">
+        Arrastra la preposición correcta al espacio en blanco
+      </p>
+    </header>
+
+    <!-- Stats bar -->
+    <div class="stats" role="status" aria-live="polite">
+      <div class="stat">
+        <span class="stat-num" id="score-num">0</span>
+        <span class="stat-label">Puntos</span>
+      </div>
+      <div class="stat" id="streak-stat">
+        <span class="stat-num" id="streak-num">0</span>
+        <span class="stat-label">Racha 🔥</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num" id="progress-num">1/25</span>
+        <span class="stat-label">Progreso</span>
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div
+      class="progress-bar-wrap"
+      role="progressbar"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="0"
+    >
+      <div class="progress-bar-fill" id="prog-fill"></div>
+    </div>
+
+    <!-- Category badge -->
+    <span
+      class="category-badge"
+      id="category-badge"
+      aria-label="Categoría de la pregunta"
+    ></span>
+
+    <!-- Game card -->
+    <main class="game-card" id="game-card">
+      <div
+        class="sentence"
+        id="sentence-text"
+        aria-label="Oración con espacio en blanco"
+      ></div>
+
+      <!-- Chips -->
+      <div
+        class="chips"
+        id="chips"
+        role="group"
+        aria-label="Preposiciones disponibles"
+      >
+        <button
+          class="chip chip-in"
+          id="chip-in"
+          draggable="true"
+          aria-label="Preposición IN"
+          data-prep="IN"
+        >
+          IN
+        </button>
+        <button
+          class="chip chip-on"
+          id="chip-on"
+          draggable="true"
+          aria-label="Preposición ON"
+          data-prep="ON"
+        >
+          ON
+        </button>
+        <button
+          class="chip chip-at"
+          id="chip-at"
+          draggable="true"
+          aria-label="Preposición AT"
+          data-prep="AT"
+        >
+          AT
+        </button>
+      </div>
+
+      <!-- Feedback -->
+      <div
+        class="feedback"
+        id="feedback"
+        role="alert"
+        aria-live="assertive"
+      ></div>
+
+      <!-- Hint box -->
+      <div class="hint-box" id="hint-box" aria-live="polite"></div>
+
+      <!-- Action buttons -->
+      <div class="btn-row">
+        <button class="btn" id="btn-hint" aria-label="Mostrar pista">
+          💡 Pista
+        </button>
+        <button class="btn" id="btn-clear" aria-label="Borrar selección">
+          🔄 Borrar
+        </button>
+        <button class="btn" id="btn-skip" aria-label="Saltar pregunta">
+          ⏭ Saltar
+        </button>
+        <button
+          class="btn btn-next"
+          id="next-btn"
+          aria-label="Siguiente pregunta"
+          hidden
+        >
+          Siguiente ➡️
+        </button>
+      </div>
+    </main>
+
+    <!-- End screen -->
+    <section class="end-screen" id="end-screen" aria-live="polite" hidden>
+      <p class="end-title" id="end-title"></p>
+      <p class="end-score" id="end-score"></p>
+      <button class="btn-restart" id="btn-restart">Jugar de nuevo 🎉</button>
+    </section>
+
+    <script src="../../app.js"></script>
+  </body>
+</html>

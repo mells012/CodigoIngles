@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Preposition Rules</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../styles.css" />
+  </head>
+  <body>
+    <nav class="top-bar">
+      <a href="../../index.html" class="btn">🏠Home</a>
+      <a href="javascript:history.back()" class="btn">← Go Back</a>
+    </nav>
+    <div class="bg-dots" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <h1 class="site-title">
+        Preposition
+        <span class="h-in">RU</span><span class="h-on">L</span
+        ><span class="h-at">ES</span>
+      </h1>
+      <p class="site-subtitle">
+        Arrastra la preposición correcta al espacio en blanco
+      </p>
+    </header>
+
+    <!-- Stats bar -->
+    <div class="stats" role="status" aria-live="polite" aria-atomic="true">
+      <div class="stat">
+        <span class="stat-num" id="score-num">0</span>
+        <span class="stat-label">Puntos</span>
+      </div>
+      <div class="stat" id="streak-stat">
+        <span class="stat-num" id="streak-num">0</span>
+        <span class="stat-label">Racha 🔥</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num" id="progress-num">1/25</span>
+        <span class="stat-label">Progreso</span>
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div
+      class="progress-bar-wrap"
+      role="progressbar"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="0"
+    >
+      <div class="progress-bar-fill" id="prog-fill"></div>
+    </div>
+
+    <!-- Category badge -->
+    <span id="category-badge" class="category-badge">⏱ Tiempo</span>
+
+    <!-- Main game card -->
+    <main class="game-card" id="game-card">
+      <p class="sentence" id="sentence-text"></p>
+
+      <!-- Draggable chips -->
+      <div class="chips" id="chips" aria-label="Preposiciones disponibles">
+        <button
+          class="chip chip-in"
+          id="chip-in"
+          draggable="true"
+          aria-label="Preposición IN"
+        >
+          IN
+        </button>
+        <button
+          class="chip chip-on"
+          id="chip-on"
+          draggable="true"
+          aria-label="Preposición ON"
+        >
+          ON
+        </button>
+        <button
+          class="chip chip-at"
+          id="chip-at"
+          draggable="true"
+          aria-label="Preposición AT"
+        >
+          AT
+        </button>
+      </div>
+
+      <div
+        class="feedback"
+        id="feedback"
+        role="alert"
+        aria-live="assertive"
+      ></div>
+      <div class="hint-box" id="hint-box" aria-live="polite"></div>
+
+      <div class="btn-row">
+        <button class="btn" id="btn-hint" type="button">💡 Pista</button>
+        <button class="btn" id="btn-clear" type="button">🔄 Borrar</button>
+        <button class="btn" id="btn-skip" type="button">⏭ Saltar</button>
+        <button class="btn btn-next" id="next-btn" type="button" hidden>
+          Siguiente ➡️
+        </button>
+      </div>
+    </main>
+
+    <!-- End screen -->
+    <section class="end-screen" id="end-screen" aria-live="polite" hidden>
+      <p class="end-title" id="end-title"></p>
+      <p class="end-score" id="end-score"></p>
+      <button class="btn-restart" id="btn-restart" type="button">
+        Jugar de nuevo 🎉
+      </button>
+    </section>
+
+    <script src="../../app.js"></script>
+  </body>
+</html>

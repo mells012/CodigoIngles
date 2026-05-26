@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>English Practice Room</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <nav class="top-bar">
+      <a href="../../index.html" class="btn">🏠Home</a>
+      <a href="javascript:history.back()" class="btn">← Go Back</a>
+    </nav>
+    <div class="bg-dots" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <h1 class="site-title">
+        English
+        <span class="h-in">Practice </span>
+        <span class="h-on">Room</span>
+      </h1>
+      <p class="site-subtitle">Welcome to the English practice room!</p>
+    </header>
+    <section class="topics-grid">
+      <div class="topic-card">
+        <a href="Examples_Exercise/index.html" class="chip" id="btn-fill">
+          Fill the sentence
+        </a>
+        <p class="topic-desc">
+          Drag the correct preposition into the blank space to complete each
+          sentence.
+        </p>
+      </div>
+
+      <div class="topic-card">
+        <a href="Rules_Exercise/index.html">
+          <button class="chip" id="btn-rules">Learn the rules</button>
+        </a>
+        <p class="topic-desc">
+          Study when to use IN, ON and AT with examples for each rule.
+        </p>
+      </div>
+    </section>
+
+    <script>
+      const colors = ["chip-in", "chip-on", "chip-at"];
+      const shuffled = colors.sort(() => Math.random() - 0.5);
+
+      ["btn-fill", "btn-rules"].forEach((id, index) => {
+        document.getElementById(id).classList.add(shuffled[index]);
+      });
+    </script>
+  </body>
+</html>

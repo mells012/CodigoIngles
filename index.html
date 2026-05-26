@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>English Practice Room</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-dots" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <h1 class="site-title">
+        English
+        <span class="h-in">Practice </span>
+        <span class="h-on">Room</span>
+      </h1>
+      <p class="site-subtitle">Welcome to the English practice room!</p>
+    </header>
+    <section class="topics-grid">
+      <div class="topic-card">
+        <a
+          href="PreposicionesIN_ON_AT/index.html"
+          class="chip"
+          id="btn-prepositions"
+        >
+          Prepositions
+        </a>
+        <p class="topic-desc">Practice prepositions IN, ON and AT.</p>
+      </div>
+    </section>
+    <script>
+      const colors = ["chip-in", "chip-on", "chip-at"];
+      document
+        .getElementById("btn-prepositions")
+        .classList.add(colors[Math.floor(Math.random() * colors.length)]);
+    </script>
+  </body>
+</html>
