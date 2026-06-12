@@ -1,0 +1,5 @@
+# Dependencies
+node_modules/
+
+# Runtime database (regenerated on first run; contains scores)
+questions.db

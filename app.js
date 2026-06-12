@@ -10,190 +10,36 @@
  *  - Touch ghost uses class, not a long inline style string
  *  - Keyboard shortcut isolated in one handler
  *  - Descriptive variable / function names
+ *
+ * Data source: fetched from the REST API at API_BASE_URL.
+ * Run the server (server/index.js) before opening the game locally.
  */
 
 "use strict";
 
 /* ============================================================
-   Data
+   API configuration
+   Change API_BASE_URL to your deployed server URL for production.
    ============================================================ */
+const API_BASE_URL = "http://localhost:3000";
 
-/** @type {Array<{sentence: string, answer: 'IN'|'ON'|'AT', category: string, hint: string}>} */
-const QUESTIONS = [
-  // --- Time: IN ---
-  {
-    sentence: "Months",
-    answer: "IN",
-    category: "⏱ Tiempo",
-    hint: "We are moving ___ May.",
-  },
-  {
-    sentence: "Years",
-    answer: "IN",
-    category: "⏱ Tiempo",
-    hint: "They got married ___ 1975.",
-  },
-  {
-    sentence: "Centuries and decades",
-    answer: "IN",
-    category: "⏱ Tiempo",
-    hint: "Internet was invented ___ the 20th century.",
-  },
-  {
-    sentence: "Seasons",
-    answer: "IN",
-    category: "⏱ Tiempo",
-    hint: "___ summer, we love having lunch in the garden.",
-  },
-  {
-    sentence: "Morning",
-    answer: "IN",
-    category: "⏱ Tiempo",
-    hint: "I always have a shower ___ the morning.",
-  },
-  {
-    sentence: "Afternoon",
-    answer: "IN",
-    category: "⏱ Tiempo",
-    hint: "We'll go to the cinema ___ the afternoon.",
-  },
-  {
-    sentence: "Evening",
-    answer: "IN",
-    category: "⏱ Tiempo",
-    hint: "We usually meet ___ the evening.",
-  },
+/* ============================================================
+   Game mode
+   Two pages share this script:
+   - "rules"    (default): question = rule keyword (e.g. "Months"),
+                           hint reveals the example sentence.
+   - "examples":           question = example sentence with a blank
+                           (e.g. "We are moving ___ May."),
+                           hint reveals the rule keyword.
+   Set window.GAME_MODE = "examples" in the HTML before loading this file.
+   ============================================================ */
+const GAME_MODE = window.GAME_MODE === "examples" ? "examples" : "rules";
 
-  // --- Place: IN ---
-  {
-    sentence: "Cities, countries, and continents",
-    answer: "IN",
-    category: "📍 Lugar",
-    hint: "People drive on the left ___ the UK.",
-  },
-  {
-    sentence: "Parts of a country, region, or city",
-    answer: "IN",
-    category: "📍 Lugar",
-    hint: "The weather is wet ___ the north of Spain.",
-  },
-  {
-    sentence: "Car and taxi",
-    answer: "IN",
-    category: "📍 Lugar",
-    hint: "Dad is waiting for you ___ the car.",
-  },
-  {
-    sentence: "Enclosed spaces or defined areas",
-    answer: "IN",
-    category: "📍 Lugar",
-    hint: "Your brother is ___ the kitchen.",
-  },
-
-  // --- Time: ON ---
-  {
-    sentence: "Days of the week",
-    answer: "ON",
-    category: "⏱ Tiempo",
-    hint: "___ Wednesdays we wear pink.",
-  },
-  {
-    sentence: "Specific dates",
-    answer: "ON",
-    category: "⏱ Tiempo",
-    hint: "Her birthday party is ___ September 4th.",
-  },
-  {
-    sentence: "Part of a specific day",
-    answer: "ON",
-    category: "⏱ Tiempo",
-    hint: "___ Tuesday mornings I go to the gym.",
-  },
-  {
-    sentence: "Special days with 'day'",
-    answer: "ON",
-    category: "⏱ Tiempo",
-    hint: "The family gets together ___ Christmas Day.",
-  },
-
-  // --- Place: ON ---
-  {
-    sentence: "Streets",
-    answer: "ON",
-    category: "📍 Lugar",
-    hint: "The shop is ___ Victoria Street.",
-  },
-  {
-    sentence: "Parts of a room",
-    answer: "ON",
-    category: "📍 Lugar",
-    hint: "Your dirty clothes are ___ the floor.",
-  },
-  {
-    sentence: "Floors of a building",
-    answer: "ON",
-    category: "📍 Lugar",
-    hint: "I live ___ the 2nd floor.",
-  },
-  {
-    sentence: "Transportation (except car and taxi)",
-    answer: "ON",
-    category: "📍 Lugar",
-    hint: "They served terrible food ___ the plane.",
-  },
-
-  // --- Time: AT ---
-  {
-    sentence: "Clock times",
-    answer: "AT",
-    category: "⏱ Tiempo",
-    hint: "Lessons start ___ 8:30.",
-  },
-  {
-    sentence: "Meal times",
-    answer: "AT",
-    category: "⏱ Tiempo",
-    hint: "Let's meet ___ lunchtime.",
-  },
-  {
-    sentence: "Weekend",
-    answer: "AT",
-    category: "⏱ Tiempo",
-    hint: "He will be working ___ the weekend.",
-  },
-  {
-    sentence: "Special holidays without 'day'",
-    answer: "AT",
-    category: "⏱ Tiempo",
-    hint: "We'll be in Spain ___ Christmas.",
-  },
-  {
-    sentence: "Specific parts of the day",
-    answer: "AT",
-    category: "⏱ Tiempo",
-    hint: "Owls go hunting ___ night.",
-  },
-
-  // --- Place: AT ---
-  {
-    sentence: "Addresses",
-    answer: "AT",
-    category: "📍 Lugar",
-    hint: "Sherlock Holmes lives ___ 221B Baker Street.",
-  },
-  {
-    sentence: "Specific places in a town or city",
-    answer: "AT",
-    category: "📍 Lugar",
-    hint: "She studies ___ Oxford University.",
-  },
-  {
-    sentence: "Home",
-    answer: "AT",
-    category: "📍 Lugar",
-    hint: "I'm ___ home waiting for the delivery man.",
-  },
-];
+// Which question field carries the blank to fill, and which is the revealed rule.
+const FIELD =
+  GAME_MODE === "examples"
+    ? { question: "hint", rule: "sentence" }
+    : { question: "sentence", rule: "hint" };
 
 /* ============================================================
    DOM references (cached once)
@@ -222,6 +68,12 @@ const DOM = {
   btnClear: document.getElementById("btn-clear"),
   btnSkip: document.getElementById("btn-skip"),
   btnRestart: document.getElementById("btn-restart"),
+  saveScore: document.getElementById("save-score"),
+  playerName: document.getElementById("player-name"),
+  btnSaveScore: document.getElementById("btn-save-score"),
+  saveStatus: document.getElementById("save-status"),
+  leaderboard: document.getElementById("leaderboard"),
+  leaderboardList: document.getElementById("leaderboard-list"),
 };
 
 /** Chip element lookup by preposition key */
@@ -230,7 +82,6 @@ const CHIP_EL = { IN: DOM.chipIn, ON: DOM.chipOn, AT: DOM.chipAt };
 /* ============================================================
    Game state
    ============================================================ */
-/** @type {{ queue: typeof QUESTIONS, current: typeof QUESTIONS[0]|null, score: number, streak: number, answered: number, answeredCorrectly: number, answerState: 'correct'|'wrong'|null, dragging: string|null, touchChip: string|null, touchGhost: HTMLElement|null }} */
 const state = {
   queue: [],
   current: null,
@@ -248,12 +99,6 @@ const state = {
    Pure helpers
    ============================================================ */
 
-/**
- * Shallow-shuffle an array (Fisher-Yates).
- * @template T
- * @param {T[]} arr
- * @returns {T[]}
- */
 function shuffleArray(arr) {
   const copy = [...arr];
   for (let i = copy.length - 1; i > 0; i--) {
@@ -263,11 +108,6 @@ function shuffleArray(arr) {
   return copy;
 }
 
-/**
- * Return a result emoji based on percentage.
- * @param {number} pct
- * @returns {string}
- */
 function getEndEmoji(pct) {
   if (pct >= 90) return "🏆";
   if (pct >= 70) return "🎉";
@@ -275,12 +115,6 @@ function getEndEmoji(pct) {
   return "💪";
 }
 
-/**
- * Build the sentence HTML inserting a drop-zone span where ___ appears.
- * If the sentence has no ___, the drop-zone is appended at the end.
- * @param {string} sentence
- * @returns {string}
- */
 function buildSentenceHTML(sentence) {
   const dropZone =
     '<span class="drop-zone" id="drop-zone" aria-label="Zona de respuesta"></span>';
@@ -293,7 +127,6 @@ function buildSentenceHTML(sentence) {
    Rendering helpers
    ============================================================ */
 
-/** Update the three stat counters and progress bar. */
 function updateStats(animateStreak) {
   DOM.scoreNum.textContent = state.score;
   DOM.streakNum.textContent = state.streak;
@@ -307,22 +140,16 @@ function updateStats(animateStreak) {
 
   if (animateStreak && state.streak > 0) {
     DOM.streakStat.classList.remove("streak-pop");
-    // Force reflow so re-adding the class re-triggers the animation
     void DOM.streakStat.offsetWidth;
     DOM.streakStat.classList.add("streak-pop");
   }
 }
 
-/**
- * Show inline feedback beneath the card.
- * @param {boolean} correct
- */
 function showFeedback(correct) {
   DOM.feedback.className = `feedback show ${correct ? "ok" : "err"}`;
   DOM.feedback.innerHTML = `<span class="feedback-title">${correct ? "Correcto" : "Incorrecto"}</span>`;
 }
 
-/** Reset chip visual state (used / dragging classes). */
 function resetChips() {
   Object.values(CHIP_EL).forEach((el) =>
     el.classList.remove("used", "dragging"),
@@ -333,9 +160,30 @@ function resetChips() {
    Game flow
    ============================================================ */
 
-/** Initialise / restart a full game. */
-function startGame() {
-  state.queue = shuffleArray(QUESTIONS);
+/**
+ * Fetch questions from the API, then start the game.
+ * async/await: the game waits for the server response before starting.
+ */
+async function startGame() {
+  try {
+    // fetch() sends an HTTP GET request to the API and waits for the response.
+    const response = await fetch(`${API_BASE_URL}/api/questions`);
+
+    if (!response.ok) {
+      throw new Error(`Server responded with status ${response.status}`);
+    }
+
+    // .json() reads the response body and parses it into a JS array.
+    const questions = await response.json();
+
+    state.queue = shuffleArray(questions);
+  } catch (err) {
+    console.error("Could not load questions from the API:", err);
+    DOM.sentenceText.textContent =
+      "⚠️ Could not connect to the server. Make sure it is running.";
+    return;
+  }
+
   state.score = 0;
   state.streak = 0;
   state.answered = 0;
@@ -349,7 +197,6 @@ function startGame() {
   loadQuestion();
 }
 
-/** Load the current question into the card. */
 function loadQuestion() {
   if (state.answered >= state.queue.length) {
     showEndScreen();
@@ -359,10 +206,8 @@ function loadQuestion() {
   state.current = state.queue[state.answered];
   state.answerState = null;
 
-  // Render sentence
-  DOM.sentenceText.innerHTML = buildSentenceHTML(state.current.sentence);
+  DOM.sentenceText.innerHTML = buildSentenceHTML(state.current[FIELD.question]);
 
-  // Reset UI state
   DOM.categoryBadge.textContent = state.current.category;
   DOM.feedback.className = "feedback";
   DOM.feedback.textContent = "";
@@ -373,19 +218,15 @@ function loadQuestion() {
 
   resetChips();
 
-  // Colores aleatorios únicos para cada chip
   const chipColors = shuffleArray(["chip-in", "chip-on", "chip-at"]);
   [DOM.chipIn, DOM.chipOn, DOM.chipAt].forEach((chip, i) => {
     chip.classList.add(chipColors[i]);
   });
 
   updateStats(false);
-
-  // Attach drop events to the freshly created drop zone
   attachDropZoneListeners();
 }
 
-/** Attach dragover / dragleave / drop to the current drop zone element. */
 function attachDropZoneListeners() {
   const dz = document.getElementById("drop-zone");
   if (!dz) return;
@@ -406,10 +247,6 @@ function attachDropZoneListeners() {
   });
 }
 
-/**
- * Evaluate the player's chosen preposition.
- * @param {string|null} prep  - 'IN' | 'ON' | 'AT'
- */
 function processAnswer(prep) {
   if (!prep || !state.current || state.answerState) return;
 
@@ -441,14 +278,12 @@ function processAnswer(prep) {
   }
 }
 
-/** Advance to the next question (only callable after a correct answer). */
 function advanceQuestion() {
   if (state.answerState !== "correct") return;
   state.answered++;
   loadQuestion();
 }
 
-/** Skip the current question (resets streak). */
 function skipQuestion() {
   state.streak = 0;
   state.answerState = null;
@@ -457,7 +292,6 @@ function skipQuestion() {
   loadQuestion();
 }
 
-/** Clear the drop zone so the player can try again. */
 function clearDrop() {
   if (state.answerState === "correct") return;
 
@@ -475,13 +309,11 @@ function clearDrop() {
   resetChips();
 }
 
-/** Show the hint for the current question. */
 function showHint() {
-  DOM.hintBox.innerHTML = `<strong>💡 Regla:</strong> ${state.current.hint}`;
+  DOM.hintBox.innerHTML = `<strong>💡 Regla:</strong> ${state.current[FIELD.rule]}`;
   DOM.hintBox.classList.add("show");
 }
 
-/** Render the end-of-game summary screen. */
 function showEndScreen() {
   DOM.gameCard.hidden = true;
   DOM.endScreen.hidden = false;
@@ -494,13 +326,109 @@ function showEndScreen() {
      Puntuación final: <strong>${state.score} pts</strong>`;
 
   DOM.progFill.style.width = "100%";
+
+  // Save-score + leaderboard are optional UI (only on pages that include them).
+  if (DOM.saveScore) {
+    // Reset the save UI so the player can record this game's score.
+    DOM.saveScore.hidden = false;
+    DOM.btnSaveScore.disabled = false;
+    DOM.playerName.disabled = false;
+    DOM.playerName.value = "";
+    DOM.saveStatus.textContent = "";
+    DOM.saveStatus.className = "save-status";
+    DOM.leaderboard.hidden = true;
+
+    // Show the existing leaderboard right away (does not require saving first).
+    loadLeaderboard();
+  }
+}
+
+/* ============================================================
+   Scores (backend)
+   ============================================================ */
+
+/** Save the just-finished game to the backend under the typed player name. */
+async function saveScore() {
+  const player = DOM.playerName.value.trim();
+  if (!player) {
+    DOM.saveStatus.textContent = "Escribe tu nombre primero.";
+    DOM.saveStatus.className = "save-status err";
+    DOM.playerName.focus();
+    return;
+  }
+
+  DOM.btnSaveScore.disabled = true;
+  DOM.saveStatus.textContent = "Guardando…";
+  DOM.saveStatus.className = "save-status";
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/scores`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        player,
+        score: state.score,
+        correct: state.answeredCorrectly,
+        total: state.queue.length,
+      }),
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    DOM.saveStatus.textContent = "¡Puntaje guardado! ✅";
+    DOM.saveStatus.className = "save-status ok";
+    DOM.playerName.disabled = true;
+    await loadLeaderboard();
+  } catch (err) {
+    console.error(err);
+    DOM.saveStatus.textContent =
+      "No se pudo guardar. ¿Está el servidor encendido?";
+    DOM.saveStatus.className = "save-status err";
+    DOM.btnSaveScore.disabled = false;
+  }
+}
+
+/** Fetch the top scores and render the leaderboard list. */
+async function loadLeaderboard() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/scores`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const scores = await res.json();
+    if (!scores.length) {
+      DOM.leaderboard.hidden = true;
+      return;
+    }
+
+    DOM.leaderboardList.innerHTML = scores
+      .map(
+        (s) =>
+          `<li><span class="lb-name">${escapeHTML(s.player)}</span><span class="lb-score">${s.score} pts</span></li>`,
+      )
+      .join("");
+    DOM.leaderboard.hidden = false;
+  } catch (err) {
+    // Server unreachable — hide the leaderboard instead of showing an error.
+    console.warn("Leaderboard unavailable:", err);
+    DOM.leaderboard.hidden = true;
+  }
+}
+
+/**
+ * Escape user-supplied text before inserting it as HTML (prevents injection).
+ * @param {string} str
+ * @returns {string}
+ */
+function escapeHTML(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
 }
 
 /* ============================================================
    Drag-and-drop (mouse)
    ============================================================ */
 
-/** Set up drag events on each chip element. */
 function initChipDragListeners() {
   Object.entries(CHIP_EL).forEach(([prep, el]) => {
     el.setAttribute("draggable", "true");
@@ -521,11 +449,6 @@ function initChipDragListeners() {
    Touch drag-and-drop (mobile)
    ============================================================ */
 
-/**
- * Create a floating ghost element that follows the finger.
- * @param {HTMLElement} source  - chip element being dragged
- * @param {Touch} touch
- */
 function createTouchGhost(source, touch) {
   const ghost = source.cloneNode(true);
   ghost.classList.add("dragging");
@@ -539,13 +462,11 @@ function createTouchGhost(source, touch) {
   return ghost;
 }
 
-/** Move the ghost to follow a touch point. */
 function moveTouchGhost(ghost, touch) {
   ghost.style.top = `${touch.clientY - 27}px`;
   ghost.style.left = `${touch.clientX - 43}px`;
 }
 
-/** Check whether a touch point is inside an element's bounding rect. */
 function isTouchInside(touch, el) {
   const r = el.getBoundingClientRect();
   return (
@@ -556,7 +477,6 @@ function isTouchInside(touch, el) {
   );
 }
 
-/** Set up touch events on each chip element. */
 function initChipTouchListeners() {
   Object.entries(CHIP_EL).forEach(([prep, el]) => {
     el.addEventListener(
@@ -611,7 +531,6 @@ function initChipTouchListeners() {
    Keyboard shortcuts
    ============================================================ */
 
-/** Allow 'i', 'o', 'a' keys to select a preposition. */
 function initKeyboardShortcuts() {
   const KEY_MAP = { i: "IN", o: "ON", a: "AT" };
 
@@ -631,6 +550,11 @@ function initButtonListeners() {
   DOM.btnSkip.addEventListener("click", skipQuestion);
   DOM.nextBtn.addEventListener("click", advanceQuestion);
   DOM.btnRestart.addEventListener("click", startGame);
+  // Save-score UI is optional (only present on pages that include it).
+  DOM.btnSaveScore?.addEventListener("click", saveScore);
+  DOM.playerName?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") saveScore();
+  });
 }
 
 /* ============================================================
@@ -641,7 +565,7 @@ function init() {
   initChipTouchListeners();
   initKeyboardShortcuts();
   initButtonListeners();
-  startGame();
+  startGame(); // async: fetches questions, then starts the game
 }
 
 init();

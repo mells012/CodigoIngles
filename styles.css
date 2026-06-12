@@ -566,6 +566,114 @@ body > *:not(.bg-dots) {
   transform: scale(1.05);
   box-shadow: 0 8px 26px rgba(91, 62, 245, 0.5);
 }
+
+/* ── Save score ───────────────────────────────────────────── */
+.save-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.save-score-label {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.save-score-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.player-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 2px solid var(--color-in);
+  border-radius: var(--radius-md);
+  font-family: "DM Sans", sans-serif;
+  font-size: 1rem;
+  outline: none;
+}
+
+.player-input:focus {
+  box-shadow: 0 0 0 3px rgba(91, 62, 245, 0.25);
+}
+
+.player-input:disabled {
+  opacity: 0.6;
+}
+
+.save-status {
+  font-size: 0.85rem;
+  min-height: 1.2em;
+  color: var(--muted);
+}
+
+.save-status.ok {
+  color: #1a7f37;
+}
+
+.save-status.err {
+  color: #c0392b;
+}
+
+/* ── Leaderboard ──────────────────────────────────────────── */
+.leaderboard {
+  width: 100%;
+  max-width: 360px;
+  text-align: left;
+}
+
+.leaderboard-title {
+  font-family: "Fraunces", serif;
+  font-size: 1.2rem;
+  text-align: center;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+
+.leaderboard-list {
+  list-style: none;
+  counter-reset: rank;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.leaderboard-list li {
+  counter-increment: rank;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 14px;
+  background: rgba(91, 62, 245, 0.06);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+}
+
+.leaderboard-list li::before {
+  content: counter(rank);
+  font-weight: 700;
+  color: var(--color-in);
+  min-width: 1.4em;
+}
+
+.lb-name {
+  flex: 1;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.lb-score {
+  font-weight: 700;
+  color: var(--color-in);
+}
 .topic-card {
   display: flex;
   flex-direction: column;
