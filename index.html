@@ -27,7 +27,7 @@
       </button>
     </header>
 
-    <!-- Global leaderboard panel (toggles on button click) -->
+    <!-- Global leaderboard panel -->
     <section class="home-leaderboard" id="home-leaderboard" hidden aria-live="polite">
       <h2 class="leaderboard-title">🏆 Mejores puntajes globales</h2>
       <ol class="leaderboard-list" id="home-leaderboard-list"></ol>
@@ -46,6 +46,7 @@
       </div>
     </section>
 
+    <script src="supabase-config.js"></script>
     <script>
       const colors = ["chip-in", "chip-on", "chip-at"];
       document
@@ -53,10 +54,8 @@
         .classList.add(colors[Math.floor(Math.random() * colors.length)]);
 
       /* ── Global leaderboard ── */
-      const API_BASE_URL = "http://localhost:3000";
-
       const EXERCISE_LABELS = {
-        "preposiciones-reglas": "Preposiciones · Reglas",
+        "preposiciones-reglas":   "Preposiciones · Reglas",
         "preposiciones-ejemplos": "Preposiciones · Ejemplos",
       };
 
@@ -73,15 +72,13 @@
       function formatDate(isoStr) {
         if (!isoStr) return "—";
         return new Date(isoStr).toLocaleDateString("es-ES", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
+          day: "numeric", month: "short", year: "numeric",
         });
       }
 
-      const btnLeaderboard = document.getElementById("btn-show-leaderboard");
+      const btnLeaderboard   = document.getElementById("btn-show-leaderboard");
       const leaderboardPanel = document.getElementById("home-leaderboard");
-      const leaderboardList = document.getElementById("home-leaderboard-list");
+      const leaderboardList  = document.getElementById("home-leaderboard-list");
 
       btnLeaderboard.addEventListener("click", async () => {
         if (!leaderboardPanel.hidden) {
@@ -94,13 +91,25 @@
         btnLeaderboard.disabled = true;
 
         try {
-          const res = await fetch(`${API_BASE_URL}/api/scores`);
+          const params = new URLSearchParams({
+            select: "player,score,correct,total,played_at,exercise",
+            order: "score.desc,played_at.asc",
+            limit: "10",
+          });
+          const res = await fetch(
+            `${window.SUPABASE_URL}/rest/v1/scores?${params}`,
+            {
+              headers: {
+                "apikey":        window.SUPABASE_ANON_KEY,
+                "Authorization": `Bearer ${window.SUPABASE_ANON_KEY}`,
+              },
+            }
+          );
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const scores = await res.json();
 
           if (!scores.length) {
-            leaderboardList.innerHTML =
-              "<li class='lb-empty'>Aún no hay puntajes guardados.</li>";
+            leaderboardList.innerHTML = "<li class='lb-empty'>Aún no hay puntajes guardados.</li>";
           } else {
             leaderboardList.innerHTML = scores
               .map(
@@ -123,7 +132,7 @@
           btnLeaderboard.textContent = "✕ Cerrar Leaderboard";
         } catch (err) {
           console.error(err);
-          btnLeaderboard.textContent = "⚠️ Error — ¿servidor encendido?";
+          btnLeaderboard.textContent = "⚠️ Error al cargar";
         } finally {
           btnLeaderboard.disabled = false;
         }

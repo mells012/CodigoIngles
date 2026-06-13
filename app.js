@@ -18,10 +18,16 @@
 "use strict";
 
 /* ============================================================
-   API configuration
-   Change API_BASE_URL to your deployed server URL for production.
+   Supabase configuration
+   Values come from supabase-config.js — load that file before this one.
    ============================================================ */
-const API_BASE_URL = "http://localhost:3000";
+const SUPABASE_URL      = window.SUPABASE_URL;
+const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY;
+const SUPABASE_HEADERS  = {
+  "apikey":        SUPABASE_ANON_KEY,
+  "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+  "Content-Type":  "application/json",
+};
 
 /* ============================================================
    Game mode
@@ -183,30 +189,14 @@ function resetChips() {
    Game flow
    ============================================================ */
 
-/**
- * Fetch questions from the API, then start the game.
- * async/await: the game waits for the server response before starting.
- */
-async function startGame() {
-  try {
-    // fetch() sends an HTTP GET request to the API and waits for the response.
-    const response = await fetch(`${API_BASE_URL}/api/questions`);
-
-    if (!response.ok) {
-      throw new Error(`Server responded with status ${response.status}`);
-    }
-
-    // .json() reads the response body and parses it into a JS array.
-    const questions = await response.json();
-
-    state.queue = shuffleArray(questions);
-  } catch (err) {
-    console.error("Could not load questions from the API:", err);
-    DOM.sentenceText.textContent =
-      "⚠️ Could not connect to the server. Make sure it is running.";
+function startGame() {
+  const questions = window.QUESTIONS;
+  if (!questions || !questions.length) {
+    DOM.sentenceText.textContent = "⚠️ No hay preguntas definidas para este ejercicio.";
     return;
   }
 
+  state.queue = shuffleArray(questions);
   state.score = 0;
   state.streak = 0;
   state.answered = 0;
@@ -370,7 +360,7 @@ function showEndScreen() {
    Scores (backend)
    ============================================================ */
 
-/** Save the just-finished game to the backend under the typed player name. */
+/** Save the just-finished game to Supabase under the typed player name. */
 async function saveScore() {
   const player = DOM.playerName.value.trim();
   if (!player) {
@@ -385,9 +375,9 @@ async function saveScore() {
   DOM.saveStatus.className = "save-status";
 
   try {
-    const res = await fetch(`${API_BASE_URL}/api/scores`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/scores`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { ...SUPABASE_HEADERS, "Prefer": "return=minimal" },
       body: JSON.stringify({
         player,
         score: state.score,
@@ -405,17 +395,27 @@ async function saveScore() {
     await loadLeaderboard();
   } catch (err) {
     console.error(err);
-    DOM.saveStatus.textContent =
-      "No se pudo guardar. ¿Está el servidor encendido?";
+    DOM.saveStatus.textContent = "No se pudo guardar. ¿Está configurado Supabase?";
     DOM.saveStatus.className = "save-status err";
     DOM.btnSaveScore.disabled = false;
   }
 }
 
-/** Fetch the top scores and render the leaderboard list. */
+/** Fetch the top scores from Supabase and render the leaderboard list. */
 async function loadLeaderboard() {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/scores?exercise=${encodeURIComponent(EXERCISE_NAME)}`);
+    const params = new URLSearchParams({
+      select: "player,score,correct,total,played_at,exercise",
+      exercise: `eq.${EXERCISE_NAME}`,
+      order: "score.desc,played_at.asc",
+      limit: "10",
+    });
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/scores?${params}`, {
+      headers: {
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+    });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
     const scores = await res.json();
