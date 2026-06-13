@@ -145,11 +145,40 @@
     <section class="end-screen" id="end-screen" aria-live="polite" hidden>
       <p class="end-title" id="end-title"></p>
       <p class="end-score" id="end-score"></p>
+
+      <!-- Save score -->
+      <div class="save-score" id="save-score">
+        <label for="player-name" class="save-score-label">
+          Escribe tu nombre para guardar tu puntaje:
+        </label>
+        <div class="save-score-row">
+          <input
+            type="text"
+            id="player-name"
+            class="player-input"
+            maxlength="20"
+            placeholder="Tu nombre"
+            autocomplete="off"
+          />
+          <button class="btn" id="btn-save-score" type="button">
+            💾 Guardar
+          </button>
+        </div>
+        <p class="save-status" id="save-status" aria-live="polite"></p>
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="leaderboard" id="leaderboard" hidden>
+        <h3 class="leaderboard-title">🏆 Mejores puntajes</h3>
+        <ol class="leaderboard-list" id="leaderboard-list"></ol>
+      </div>
+
       <button class="btn-restart" id="btn-restart">Jugar de nuevo 🎉</button>
     </section>
 
     <script>
       window.GAME_MODE = "examples";
+      window.EXERCISE_NAME = "preposiciones-ejemplos";
     </script>
     <script src="../../app.js"></script>
   </body>

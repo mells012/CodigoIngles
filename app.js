@@ -35,6 +35,29 @@ const API_BASE_URL = "http://localhost:3000";
    ============================================================ */
 const GAME_MODE = window.GAME_MODE === "examples" ? "examples" : "rules";
 
+// Identifier sent with every saved score so each exercise has its own leaderboard.
+// Set window.EXERCISE_NAME in the HTML before loading this file.
+const EXERCISE_NAME = typeof window.EXERCISE_NAME === "string" ? window.EXERCISE_NAME.trim() : "";
+
+// Human-readable labels for each exercise identifier.
+const EXERCISE_LABELS = {
+  "preposiciones-reglas": "Preposiciones · Reglas",
+  "preposiciones-ejemplos": "Preposiciones · Ejemplos",
+};
+
+function exerciseLabel(id) {
+  return EXERCISE_LABELS[id] || id || "—";
+}
+
+function formatDate(isoStr) {
+  if (!isoStr) return "—";
+  return new Date(isoStr).toLocaleDateString("es-ES", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 // Which question field carries the blank to fill, and which is the revealed rule.
 const FIELD =
   GAME_MODE === "examples"
@@ -370,6 +393,7 @@ async function saveScore() {
         score: state.score,
         correct: state.answeredCorrectly,
         total: state.queue.length,
+        exercise: EXERCISE_NAME,
       }),
     });
 
@@ -391,7 +415,7 @@ async function saveScore() {
 /** Fetch the top scores and render the leaderboard list. */
 async function loadLeaderboard() {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/scores`);
+    const res = await fetch(`${API_BASE_URL}/api/scores?exercise=${encodeURIComponent(EXERCISE_NAME)}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
     const scores = await res.json();
@@ -403,7 +427,16 @@ async function loadLeaderboard() {
     DOM.leaderboardList.innerHTML = scores
       .map(
         (s) =>
-          `<li><span class="lb-name">${escapeHTML(s.player)}</span><span class="lb-score">${s.score} pts</span></li>`,
+          `<li>
+            <div class="lb-main">
+              <span class="lb-name">${escapeHTML(s.player)}</span>
+              <span class="lb-score">${s.score} pts</span>
+            </div>
+            <div class="lb-meta">
+              <span class="lb-exercise">${escapeHTML(exerciseLabel(s.exercise))}</span>
+              <span class="lb-date">${formatDate(s.played_at)}</span>
+            </div>
+          </li>`,
       )
       .join("");
     DOM.leaderboard.hidden = false;

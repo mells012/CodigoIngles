@@ -22,7 +22,17 @@
         <span class="h-on">Room</span>
       </h1>
       <p class="site-subtitle">Welcome to the English practice room!</p>
+      <button class="btn btn-leaderboard-home" id="btn-show-leaderboard" type="button">
+        🏆 Ver Leaderboard
+      </button>
     </header>
+
+    <!-- Global leaderboard panel (toggles on button click) -->
+    <section class="home-leaderboard" id="home-leaderboard" hidden aria-live="polite">
+      <h2 class="leaderboard-title">🏆 Mejores puntajes globales</h2>
+      <ol class="leaderboard-list" id="home-leaderboard-list"></ol>
+    </section>
+
     <section class="topics-grid">
       <div class="topic-card">
         <a
@@ -35,11 +45,89 @@
         <p class="topic-desc">Practice prepositions IN, ON and AT.</p>
       </div>
     </section>
+
     <script>
       const colors = ["chip-in", "chip-on", "chip-at"];
       document
         .getElementById("btn-prepositions")
         .classList.add(colors[Math.floor(Math.random() * colors.length)]);
+
+      /* ── Global leaderboard ── */
+      const API_BASE_URL = "http://localhost:3000";
+
+      const EXERCISE_LABELS = {
+        "preposiciones-reglas": "Preposiciones · Reglas",
+        "preposiciones-ejemplos": "Preposiciones · Ejemplos",
+      };
+
+      function escapeHTML(str) {
+        const d = document.createElement("div");
+        d.textContent = str;
+        return d.innerHTML;
+      }
+
+      function exerciseLabel(id) {
+        return EXERCISE_LABELS[id] || id || "—";
+      }
+
+      function formatDate(isoStr) {
+        if (!isoStr) return "—";
+        return new Date(isoStr).toLocaleDateString("es-ES", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        });
+      }
+
+      const btnLeaderboard = document.getElementById("btn-show-leaderboard");
+      const leaderboardPanel = document.getElementById("home-leaderboard");
+      const leaderboardList = document.getElementById("home-leaderboard-list");
+
+      btnLeaderboard.addEventListener("click", async () => {
+        if (!leaderboardPanel.hidden) {
+          leaderboardPanel.hidden = true;
+          btnLeaderboard.textContent = "🏆 Ver Leaderboard";
+          return;
+        }
+
+        btnLeaderboard.textContent = "Cargando…";
+        btnLeaderboard.disabled = true;
+
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/scores`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const scores = await res.json();
+
+          if (!scores.length) {
+            leaderboardList.innerHTML =
+              "<li class='lb-empty'>Aún no hay puntajes guardados.</li>";
+          } else {
+            leaderboardList.innerHTML = scores
+              .map(
+                (s) =>
+                  `<li>
+                    <div class="lb-main">
+                      <span class="lb-name">${escapeHTML(s.player)}</span>
+                      <span class="lb-score">${s.score} pts</span>
+                    </div>
+                    <div class="lb-meta">
+                      <span class="lb-exercise">${escapeHTML(exerciseLabel(s.exercise))}</span>
+                      <span class="lb-date">${formatDate(s.played_at)}</span>
+                    </div>
+                  </li>`
+              )
+              .join("");
+          }
+
+          leaderboardPanel.hidden = false;
+          btnLeaderboard.textContent = "✕ Cerrar Leaderboard";
+        } catch (err) {
+          console.error(err);
+          btnLeaderboard.textContent = "⚠️ Error — ¿servidor encendido?";
+        } finally {
+          btnLeaderboard.disabled = false;
+        }
+      });
     </script>
   </body>
 </html>

@@ -3,10 +3,9 @@
 /**
  * routes/scores.js — Endpoints for saving and reading game scores
  *
- * Same factory pattern as questions.js: receives `db` and returns a router.
- *
- *   POST /api/scores       → save a finished game (body: player, score, correct, total)
- *   GET  /api/scores       → leaderboard: top 10 scores, highest first
+ *   POST /api/scores           → save a finished game (body: player, score, correct, total, exercise)
+ *   GET  /api/scores           → global leaderboard: top 10 across all exercises
+ *   GET  /api/scores?exercise= → leaderboard for a specific exercise (empty string = untagged)
  */
 
 const express = require("express");
@@ -15,14 +14,25 @@ module.exports = function scoresRouter(db) {
   const router = express.Router();
 
   // ── GET /api/scores ─────────────────────────────────────────────────────────
-  // Returns the top 10 scores, highest first (the leaderboard).
   router.get("/", (req, res) => {
     try {
-      const scores = db
-        .prepare(
-          "SELECT player, score, correct, total, played_at FROM scores ORDER BY score DESC, played_at ASC LIMIT 10"
-        )
-        .all();
+      let scores;
+      if ("exercise" in req.query) {
+        // Exercise-specific: filter to a single exercise (can be empty string for legacy rows)
+        const exercise = typeof req.query.exercise === "string" ? req.query.exercise : "";
+        scores = db
+          .prepare(
+            "SELECT player, score, correct, total, played_at, exercise FROM scores WHERE exercise = ? ORDER BY score DESC, played_at ASC LIMIT 10"
+          )
+          .all(exercise);
+      } else {
+        // Global: all exercises combined
+        scores = db
+          .prepare(
+            "SELECT player, score, correct, total, played_at, exercise FROM scores ORDER BY score DESC, played_at ASC LIMIT 10"
+          )
+          .all();
+      }
       res.json(scores);
     } catch (err) {
       console.error(err);
@@ -31,11 +41,10 @@ module.exports = function scoresRouter(db) {
   });
 
   // ── POST /api/scores ────────────────────────────────────────────────────────
-  // Saves one finished game. Body: { player, score, correct, total }
+  // Saves one finished game. Body: { player, score, correct, total, exercise }
   router.post("/", (req, res) => {
-    let { player, score, correct, total } = req.body;
+    let { player, score, correct, total, exercise } = req.body;
 
-    // Validation: player name required, numbers must be valid.
     player = typeof player === "string" ? player.trim() : "";
     if (!player) {
       return res.status(400).json({ error: "Player name is required." });
@@ -54,13 +63,15 @@ module.exports = function scoresRouter(db) {
       return res.status(400).json({ error: "Invalid score values." });
     }
 
+    exercise = typeof exercise === "string" ? exercise.trim() : "";
+
     try {
       const playedAt = new Date().toISOString();
       const result = db
         .prepare(
-          "INSERT INTO scores (player, score, correct, total, played_at) VALUES (?, ?, ?, ?, ?)"
+          "INSERT INTO scores (player, score, correct, total, played_at, exercise) VALUES (?, ?, ?, ?, ?, ?)"
         )
-        .run(player, score, correct, total, playedAt);
+        .run(player, score, correct, total, playedAt, exercise);
 
       res.status(201).json({
         id: result.lastInsertRowid,
@@ -69,6 +80,7 @@ module.exports = function scoresRouter(db) {
         correct,
         total,
         played_at: playedAt,
+        exercise,
       });
     } catch (err) {
       console.error(err);

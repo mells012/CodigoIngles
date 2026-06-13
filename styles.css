@@ -647,11 +647,11 @@ body > *:not(.bg-dots) {
 
 .leaderboard-list li {
   counter-increment: rank;
+  position: relative;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 8px 14px;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 14px 8px 38px;
   background: rgba(91, 62, 245, 0.06);
   border-radius: var(--radius-md);
   font-size: 0.95rem;
@@ -661,7 +661,17 @@ body > *:not(.bg-dots) {
   content: counter(rank);
   font-weight: 700;
   color: var(--color-in);
+  position: absolute;
+  left: 14px;
+  top: 10px;
   min-width: 1.4em;
+}
+
+.lb-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .lb-name {
@@ -673,6 +683,60 @@ body > *:not(.bg-dots) {
 .lb-score {
   font-weight: 700;
   color: var(--color-in);
+}
+
+.lb-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.lb-exercise {
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+.lb-date {
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
+.lb-empty {
+  text-align: center;
+  color: var(--muted);
+  font-style: italic;
+  padding: 16px;
+  background: none;
+}
+
+/* ── Homepage global leaderboard ──────────────────────────── */
+.home-leaderboard {
+  width: 100%;
+  max-width: 480px;
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  margin-top: 8px;
+}
+
+.home-leaderboard .leaderboard-list {
+  max-width: 100%;
+}
+
+.btn-leaderboard-home {
+  background: transparent;
+  border-color: var(--color-in);
+  color: var(--color-in);
+  margin-top: 14px;
+}
+
+.btn-leaderboard-home:hover {
+  background: rgba(91, 62, 245, 0.08);
+  color: var(--color-in);
+  border-color: var(--color-in);
 }
 .topic-card {
   display: flex;

@@ -130,6 +130,12 @@ const dbReady = initSqlJs().then((SqlJs) => {
     )
   `);
 
+  // Migration: add exercise column for existing databases that don't have it yet.
+  const scoreCols = db.prepare("PRAGMA table_info(scores)").all();
+  if (!scoreCols.some((c) => c.name === "exercise")) {
+    db.exec("ALTER TABLE scores ADD COLUMN exercise TEXT NOT NULL DEFAULT ''");
+  }
+
   // Seed only when the table is empty
   const { n } = db.prepare("SELECT COUNT(*) AS n FROM questions").get();
 
