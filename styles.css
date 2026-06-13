@@ -488,6 +488,7 @@ body > *:not(.bg-dots) {
   font-size: 0.86rem;
   font-weight: 600;
   cursor: pointer;
+  text-decoration: none;
   transition:
     background 0.2s ease,
     color 0.2s ease,
@@ -727,16 +728,16 @@ body > *:not(.bg-dots) {
 }
 
 .btn-leaderboard-home {
-  background: transparent;
-  border-color: var(--color-in);
+  background: rgba(91, 62, 245, 0.08);
+  border-color: rgba(93, 62, 245, 0);
   color: var(--color-in);
   margin-top: 14px;
 }
 
 .btn-leaderboard-home:hover {
-  background: rgba(91, 62, 245, 0.08);
-  color: var(--color-in);
-  border-color: var(--color-in);
+  background: rgba(93, 62, 245, 0.271);
+  color: #1f0d79;
+  border-color: rgba(93, 62, 245, 0.702);
 }
 .topic-card {
   display: flex;

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Historial · English Practice Room</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <nav class="top-bar">
+      <a href="index.html" class="btn">🏠 Home</a>
+    </nav>
+    <div class="bg-dots" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <h1 class="site-title">
+        📑 Registro de <span class="h-in">Actividades</span>
+      </h1>
+      <!-- <p class="site-subtitle">Mejores puntajes globales</p> -->
+    </header>
+
+    <section class="home-leaderboard" id="home-leaderboard">
+      <ol class="leaderboard-list" id="home-leaderboard-list">
+        <li class="lb-empty">Cargando…</li>
+      </ol>
+    </section>
+
+    <script src="supabase-config.js"></script>
+    <script>
+      const EXERCISE_LABELS = {
+        "preposiciones-reglas":   "Preposiciones · Reglas",
+        "preposiciones-ejemplos": "Preposiciones · Ejemplos",
+      };
+
+      function escapeHTML(str) {
+        const d = document.createElement("div");
+        d.textContent = str;
+        return d.innerHTML;
+      }
+
+      function exerciseLabel(id) {
+        return EXERCISE_LABELS[id] || id || "—";
+      }
+
+      function formatDate(isoStr) {
+        if (!isoStr) return "—";
+        return new Date(isoStr).toLocaleDateString("es-ES", {
+          day: "numeric", month: "short", year: "numeric",
+        });
+      }
+
+      async function loadLeaderboard() {
+        const list = document.getElementById("home-leaderboard-list");
+        try {
+          const params = new URLSearchParams({
+            select: "player,score,correct,total,played_at,exercise",
+            order: "score.desc,played_at.asc",
+            limit: "10",
+          });
+          const res = await fetch(
+            `${window.SUPABASE_URL}/rest/v1/scores?${params}`,
+            {
+              headers: {
+                "apikey":        window.SUPABASE_ANON_KEY,
+                "Authorization": `Bearer ${window.SUPABASE_ANON_KEY}`,
+              },
+            }
+          );
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const scores = await res.json();
+
+          if (!scores.length) {
+            list.innerHTML = "<li class='lb-empty'>Aún no hay puntajes guardados.</li>";
+          } else {
+            list.innerHTML = scores
+              .map(
+                (s) =>
+                  `<li>
+                    <div class="lb-main">
+                      <span class="lb-name">${escapeHTML(s.player)}</span>
+                      <span class="lb-score">${s.score} pts</span>
+                    </div>
+                    <div class="lb-meta">
+                      <span class="lb-exercise">${escapeHTML(exerciseLabel(s.exercise))}</span>
+                      <span class="lb-date">${formatDate(s.played_at)}</span>
+                    </div>
+                  </li>`
+              )
+              .join("");
+          }
+        } catch (err) {
+          console.error(err);
+          list.innerHTML = "<li class='lb-empty'>⚠️ No se pudo cargar el historial.</li>";
+        }
+      }
+
+      loadLeaderboard();
+    </script>
+  </body>
+</html>
